@@ -8,8 +8,9 @@ Variables (en GitHub: Settings > Secrets and variables > Actions):
 """
 import json, os, sys, time, urllib.parse, urllib.request, urllib.error
 
-API = 'https://graph.instagram.com/v23.0'
-TOKEN = os.environ['IG_TOKEN']
+TOKEN = os.environ['IG_TOKEN'].strip().strip('"').strip("'").replace(' ', '').replace('\n', '')
+# Los tokens de inicio de sesión con Instagram empiezan con "IG"; los de Meta/Facebook (usuario del sistema), con "EAA".
+API = ('https://graph.facebook.com/v23.0' if TOKEN.startswith('EAA') else 'https://graph.instagram.com/v23.0')
 USER = os.environ['IG_USER_ID']
 BASE = os.environ['BASE_URL'].rstrip('/') + '/'
 PRUEBA = os.environ.get('PRUEBA') == '1'
@@ -70,6 +71,7 @@ def main():
         print('No quedan publicaciones en la cola. Hay que cargar la tanda siguiente.')
         return
     p = pend[0]
+    print(f"Token: empieza con {TOKEN[:4]}… ({len(TOKEN)} caracteres) · servidor: {API}")
     print(f"Publicando {p['id']} · Día {p['dia']} · {p['categoria']} · {p['titulo']}")
     media = publicar(p)
     if media:
